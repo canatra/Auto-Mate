@@ -1,13 +1,35 @@
 import csv
 import math
-from sklearn import tree
+from sklearn import tree,svm, datasets
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
-
-from sklearn import svm, datasets
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import precision_recall_curve
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precision_recall_curve
+
+def precision_recall(true, pred, title="2-class Precision-Recall curve"):
+	precision,recall,thresholds = precision_recall_curve(true,pred)
+	avgprec = average_precision_score(true,pred)
+	print("Precision= "+str(precision))
+	print("Recall= "+str(recall))
+	print("thresholds= " +str(thresholds))
+	print("average_precision_score= "+str(avgprec))
+	plt.step(recall, precision, color='b', alpha=0.2,
+         where='post')
+	plt.fill_between(recall, precision, step='post', alpha=0.2,
+                 color='b')
+
+	plt.xlabel('Recall')
+	plt.ylabel('Precision')
+	plt.ylim([0.0, 1.05])
+	plt.xlim([0.0, 1.0])
+	plt.title(title+' AP={0:0.2f}'.format(
+          avgprec))
+
 
 def plot_confusion_matrix (cm, classes, normalize=False, title ='Confusion matrix', cmap=plt.cm.Blues):
 
@@ -32,35 +54,64 @@ def plot_confusion_matrix (cm, classes, normalize=False, title ='Confusion matri
 		plt.xlabel('Predicted label')
 
 
-
-def decisionTree(trainingset,testset):
-
+def split(Tset):
 	X =[]
 	Y = []
-	for row in trainingset:
+	for row in Tset:
 		X.append(row[:-1])
 		Y.append(row[-1])
+	return X, Y
 
 
+def decisionTree(X,Y, X_test, Y_test):
+	print("Decision Tree Classifier")
 	clf = tree.DecisionTreeClassifier()
 	clf =  clf.fit(X, Y)
-	X_test =[]
-	Y_test = []
-	for row in testset:
-		X_test.append(row[:-1])
-		Y_test.append(row[-1])
-
 	pred = clf.predict(X_test)
+	precision_recall(Y_test, pred,"DecisionTreeClassifier Precision-Recall")	
 	print(pred)
 	print(Y_test)
 	cnf_matrix = confusion_matrix(Y_test, pred)
 	np.set_printoptions(precision=2)
 	plt.figure()
-	plot_confusion_matrix(cnf_matrix, classes=('Aggressive', 'Calm'), title='Confusion matrix, without normalize')
+	plot_confusion_matrix(cnf_matrix, classes=('Calm','Aggressive'), title='Decision Tree Confusion matrix')
 
-	plt.figure()
-	plot_confusion_matrix(cnf_matrix, classes=('Aggressive', 'Calm'), normalize=True ,title='Confusion matrix, with normalize')
+	
 	plt.show()
+
+
+def svm_model(X, Y, X_test, Y_test):
+	clf= svm.SVC()
+	clf.fit(X,Y)
+	pred = clf.predict(X_test)
+	print("SVM prediction")
+	print(pred)
+	print(Y_test)
+	precision_recall(Y_test, pred, "SVM Precision-Recall")
+	cnf_matrix = confusion_matrix(Y_test, pred)
+	np.set_printoptions(precision=2)
+	plt.figure()
+	plot_confusion_matrix(cnf_matrix, classes=('Calm','Aggressive'), title='SVM Confusion matrix')
+
+	plt.show()
+
+def MLP_model(X, Y, X_test, Y_test):
+	print("MLPClassifier ")
+	clf = MLPClassifier(solver='lbfgs', alpha=1e-5,
+                   	hidden_layer_sizes=(5, 2), random_state=1)
+	clf.fit(X,Y)
+	pred = clf.predict(X_test)
+	precision_recall(Y_test, pred, "MLPClassifier Precision-Recall")	
+	print(pred)
+	print(Y_test)
+	cnf_matrix = confusion_matrix(Y_test, pred)
+	np.set_printoptions(precision=2)
+	plt.figure()
+	plot_confusion_matrix(cnf_matrix, classes=('Calm','Aggressive'), title='MLP Confusion matrix')
+
+	
+	plt.show()
+
 
 trainingset  =[]
 
@@ -85,7 +136,7 @@ with open('AccelerationExplorer-angry3.csv') as csvfile:
 			curr.append(float(row[2]) - prevy)
 			prevx = float(row[1])
 			prevy = float(row[2])
-		if time >= 30:
+		if time >= 48:
 			size = len(curr)
 			curr.append(1)
 			trainingset.append(curr)
@@ -96,7 +147,7 @@ with open('AccelerationExplorer-angry3.csv') as csvfile:
 			timechange += float(row[0])
 
 #	print(size)
-#	print(len(curr))
+	print(len(curr))
 #2
 #print('AccelerationExplorer-calm1.csv')
 with open('AccelerationExplorer-calm1.csv') as csvfile:
@@ -554,6 +605,10 @@ with open('AccelerationExplorer-LL-H-calm5.csv') as csvfile:
 
 #print(len(trainingset))
 trainingset, testset = train_test_split(trainingset)
+X,Y = split(trainingset)
+X_test, Y_test = split(testset)
 print(len(trainingset))
 print(len(testset))
-decisionTree(trainingset,testset)
+decisionTree(X,Y, X_test, Y_test)
+svm_model(X, Y, X_test, Y_test)
+MLP_model(X, Y, X_test, Y_test)
