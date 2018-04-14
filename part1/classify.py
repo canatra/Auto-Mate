@@ -147,7 +147,7 @@ with open('AccelerationExplorer-angry3.csv') as csvfile:
 			timechange += float(row[0])
 
 #	print(size)
-	print(len(curr))
+	#print(curr)
 #2
 #print('AccelerationExplorer-calm1.csv')
 with open('AccelerationExplorer-calm1.csv') as csvfile:
@@ -606,6 +606,8 @@ with open('AccelerationExplorer-LL-H-calm5.csv') as csvfile:
 #print(len(trainingset))
 trainingset, testset = train_test_split(trainingset)
 X,Y = split(trainingset)
+print(X[0])
+print(Y[0])
 X_test, Y_test = split(testset)
 print(len(trainingset))
 print(len(testset))
