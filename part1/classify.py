@@ -1,5 +1,6 @@
 import csv
 import math
+import os
 from sklearn import tree,svm, datasets
 import itertools
 import numpy as np
@@ -113,501 +114,85 @@ def MLP_model(X, Y, X_test, Y_test):
 	plt.show()
 
 
+
+def newList(filename, curr,size):
+
+	#1
+	#print('AccelerationExplorer-angry3.csv')
+	with open(filename) as csvfile:
+		reader = csv.reader(csvfile)
+		prevx = 0.0
+		prevy = 0.0
+		count = 0
+		time=0.0
+		for row in reader:
+
+			#acceleration = change in velocity/change in time
+			#acceleration * change in time = change in velocity
+			if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
+				count+= 1
+				if 'time_tick' not in row[0]:
+					time = float(row[0])
+					curr.append(float(row[1]) - prevx)
+					curr.append(float(row[2]) - prevy)
+					prevx = float(row[1])
+					prevy = float(row[2])
+					previous = curr
+					prevtime = float(row[0])
+					
+					if len(curr) == size or time >= 48:
+						print("current length: "+str(len(curr)))
+						return(len(curr))
+					
+		print("current length: "+str(len(curr)))
+		return(len(curr))
+
+
 trainingset  =[]
-
+curr =[]
 size = 0.0
-#1
-#print('AccelerationExplorer-angry3.csv')
-with open('AccelerationExplorer-angry3.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx = 0.0
-	prevy = 0.0
-	count = 0
-	time=0.0
-	for row in calmreader:
 
-		#acceleration = change in velocity/change in time
-		#acceleration * change in time = change in velocity
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			count+= 1
-			time = float(row[0])
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) - prevy)
-			prevx = float(row[1])
-			prevy = float(row[2])
-		if time >= 48:
-			size = len(curr)
-			curr.append(1)
-			trainingset.append(curr)
-			break
+print('AccelerationExplorer-angry3.csv')
+test1 = newList('AccelerationExplorer-angry3.csv', curr,15000)
+curr.append(1)	
+trainingset.append(curr)
+minsize =test1
+minfile ='AccelerationExplorer-angry3.csv'
+
+curr =[]
+
+
+for root, dirs, filenames in os.walk('.'):
+	for filename in filenames:
+		if ".csv" in filename and 'AccelerationExplorer-angry3.csv' not in filename and 'gyro' not in filename and 'micro' not in filename:
+			print(filename)
+			size =newList(filename, curr,test1)
+					
+			if 'calm' in filename:
+				curr.append(0)
+			else:		
+				curr.append(1)
+
+			print(size)	
+			if int(size) < minsize:
+				minsize = size
+				minfile = filename
+			if size == test1:
+				trainingset.append(curr)		
 				
-			previous = curr
-			prevtime = float(row[0])
-			timechange += float(row[0])
-
-#	print(size)
-	#print(curr)
-#2
-#print('AccelerationExplorer-calm1.csv')
-with open('AccelerationExplorer-calm1.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#3
-#print('AccelerationExplorer-calm2.csv')
-with open('AccelerationExplorer-calm2.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-				
-	#print(len(curr))		
-#4
-#print('AccelerationExplorer-H-calm1.csv')
-with open('AccelerationExplorer-H-calm1.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#print('AccelerationExplorer-H-calm2.csv')
-#5
-with open('AccelerationExplorer-H-calm2.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#6
-
-#print('AccelerationExplorer-L-calm3.csv')
-with open('AccelerationExplorer-L-calm3.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#7
-#print('AccelerationExplorer-L-H-calm3.csv')
-with open('AccelerationExplorer-L-H-calm3.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				#print("too short")
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#8
-#print('AccelerationExplorer-L-calm4.csv')
-with open('AccelerationExplorer-L-calm4.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#9
-#print('AccelerationExplorer-L-H-calm4.csv')
-with open('AccelerationExplorer-L-H-calm4.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#10
-
-#print('AccelerationExplorer-H-angry3.csv')
-with open('AccelerationExplorer-H-angry3.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#11
-#print('AccelerationExplorer-H-angry4.csv')
-with open('AccelerationExplorer-H-angry4.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-
-	
-	#print(len(curr))
-	#12
-#print('AccelerationExplorer-L-H-angry1.csv')
-with open('AccelerationExplorer-L-H-angry1.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#13
-#print('AccelerationExplorer-L-H-angry2.csv')
-with open('AccelerationExplorer-L-H-angry2.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#14
-#print('AccelerationExplorer-L-angry1.csv')
-with open('AccelerationExplorer-L-angry1.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#15
-#print('AccelerationExplorer-L-angry2.csv')
-with open('AccelerationExplorer-L-angry2.csv') as csvfile:	
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#16
-#print('AccelerationExplorer-angry4.csv')
-with open('AccelerationExplorer-angry4.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#17
-#print('AccelerationExplorer-LL-H-angry5.csv')
-with open('AccelerationExplorer-LL-H-angry5.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-#18
-#print('AccelerationExplorer-LL-angry5.csv')
-with open('AccelerationExplorer-LL-angry5.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			
-			if len(curr) == size:
-				curr.append(1)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#19
-#print('AccelerationExplorer-LL-calm5.csv')
-with open('AccelerationExplorer-LL-calm5.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-
-#20
-#print('AccelerationExplorer-LL-H-calm5.csv')
-with open('AccelerationExplorer-LL-H-calm5.csv') as csvfile:
-	calmreader = csv.reader(csvfile)
-	curr = []
-	prevx =0.0
-	prevy= 0.0
-	count = 0
-	time = 0.0
-	for row in calmreader:
-		#print(row)
-		if len(row) == 4 and row[1] != 'X' and row[1] != '' and row[2] != '' :
-			curr.append(float(row[1]) - prevx)
-			curr.append(float(row[2]) -prevy)		
-			prevx =float(row[1])
-			prevy =float(row[2])
-			count+= 1
-			time = float(row[0])
-			if len(curr) == size:
-				curr.append(0)
-				trainingset.append(curr)
-				break	
-	#print(len(curr))
-	
+			curr =[]
 
 
-#print(len(trainingset))
+
+
+
+print(minfile)
+print(minsize)
+
+print(len(trainingset))
 trainingset, testset = train_test_split(trainingset)
 X,Y = split(trainingset)
-print(X[0])
-print(Y[0])
+
 X_test, Y_test = split(testset)
 print(len(trainingset))
 print(len(testset))
